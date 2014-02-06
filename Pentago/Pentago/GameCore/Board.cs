@@ -8,27 +8,26 @@ namespace Pentago.GameCore
 {
     class Board
     {
-        public const int BOARDSIZE = 36;
-        public const int BOARWIDTH = 6;
-        public int[] board = new int[BOARDSIZE];
+        private const int BOARDSIZE = 36;
+        private const int BOARWIDTH = 6;
+        private int[] _board = new int[BOARDSIZE];
         
-
         public Board()
         {
             for (int i = 0; i < BOARDSIZE; i++) 
             {
-                this.board[i] = 0;
+                this._board[i] = 0;
             }
         }
 
         public int GetPlayer(short row, short col)
         {
-            return board[BOARWIDTH * row + col]; 
+            return this._board[BOARWIDTH * row + col]; 
         }
 
-        public int[] GetBoard()
+        public int[] GetBoard
         {
-            return board;
+            get { return this._board; }
         }
 
         public short PiecesOnBoard()
@@ -36,7 +35,7 @@ namespace Pentago.GameCore
             short count = 0;
             for (int i = 0; i < BOARDSIZE; i++)
             {
-                if (board[i] == 0)
+                if (this._board[i] == 0)
                     count++;
             }
             return count;
@@ -46,78 +45,142 @@ namespace Pentago.GameCore
         {
             for (int i = 0; i < BOARDSIZE; i++)
             {
-                this.board[i] = 0;
+                this._board[i] = 0;
             }
         }
 
         public void UpdateBoard(short row, short col, int player)
         {
-            this.board[BOARWIDTH * row + col] = player;
+            this._board[BOARWIDTH * row + col] = player;
         }
 
         public void RotateQuad1ClockWise() 
         {
-            int placeHolder = board[0];
+            int placeHolder = _board[0];
 
-            board[0] = board[12];
-            board[12] = board[14];
-            board[14] = board[2];
-            board[2] = placeHolder;
+            this._board[0] = this._board[12];
+            this._board[12] = this._board[14];
+            this._board[14] = this._board[2];
+            this._board[2] = placeHolder;
 
-            placeHolder = board[6];
-            board[6] = board[13];
-            board[13] = board[8];
-            board[8] = board[1];
-            board[1] = placeHolder;
+            placeHolder = this._board[6];
+            this._board[6] = this._board[13];
+            this._board[13] = this._board[8];
+            this._board[8] = this._board[1];
+            this._board[1] = placeHolder;
         }
 
         public void RotateQuad1CounterClockWise()
         {
-            int placeHolder = board[0];
+            int placeHolder = this._board[0];
 
-            board[0] = board[2];
-            board[2] = board[14];
-            board[14] = board[12];
-            board[12] = placeHolder;
+            this._board[0] = this._board[2];
+            this._board[2] = this._board[14];
+            this._board[14] = this._board[12];
+            this._board[12] = placeHolder;
 
-            placeHolder = board[6];
-            board[6] = board[1];
-            board[1] = board[8];
-            board[8] = board[13];
-            board[13] = placeHolder;
+            placeHolder = this._board[6];
+            this._board[6] = this._board[1];
+            this._board[1] = this._board[8];
+            this._board[8] = this._board[13];
+            this._board[13] = placeHolder;
         }
 
         public void RotateQuad2ClockWise()
         {
 
-            int placeHolder = board[3];
+            int placeHolder = this._board[3];
 
-            board[3] = board[15];
-            board[15] = board[17];
-            board[17] = board[5];
-            board[5] = placeHolder;
+            this._board[3] = this._board[15];
+            this._board[15] = this._board[17];
+            this._board[17] = this._board[5];
+            this._board[5] = placeHolder;
 
-            placeHolder = board[4];
-            board[4] = board[9];
-            board[9] = board[16];
-            board[16] = board[11];
-            board[11] = placeHolder;
+            placeHolder = this._board[4];
+            this._board[4] = this._board[9];
+            this._board[9] = this._board[16];
+            this._board[16] = this._board[11];
+            this._board[11] = placeHolder;
         }
 
         public void RotateQuad2CounterClockWise()
         {
-            int placeholder = board[3];
+            int placeholder = this._board[3];
 
-            board[3] = board[5];
-            board[5] = board[17];
-            board[17] = board[15];
-            board[15] = placeholder;
+            this._board[3] = this._board[5];
+            this._board[5] = this._board[17];
+            this._board[17] = this._board[15];
+            this._board[15] = placeholder;
 
-            placeholder = board[4];
-            board[4] = board[11];
-            board[11] = board[16];
-            board[16] = board[9];
-            board[9] = placeholder;
+            placeholder = this._board[4];
+            this._board[4] = this._board[11];
+            this._board[11] = this._board[16];
+            this._board[16] = this._board[9];
+            this._board[9] = placeholder;
+        }
+
+        public void RotateQuad3ClockWise()
+        {
+            int placeHolder = _board[18];
+
+            this._board[18] = this._board[30];
+            this._board[30] = this._board[32];
+            this._board[32] = this._board[20];
+            this._board[20] = placeHolder;
+
+            placeHolder = this._board[24];
+            this._board[24] = this._board[31];
+            this._board[31] = this._board[26];
+            this._board[26] = this._board[19];
+            this._board[19] = placeHolder;
+        }
+
+        public void RotateQuad3CounterClockWise()
+        {
+            int placeHolder = this._board[18];
+
+            this._board[18] = this._board[20];
+            this._board[20] = this._board[32];
+            this._board[32] = this._board[30];
+            this._board[30] = placeHolder;
+
+            placeHolder = this._board[24];
+            this._board[24] = this._board[19];
+            this._board[19] = this._board[26];
+            this._board[26] = this._board[31];
+            this._board[31] = placeHolder;
+        }
+
+        public void RotateQuad4ClockWise()
+        {
+            int placeholder = this._board[21];
+
+            this._board[21] = this._board[33];
+            this._board[33] = this._board[35];
+            this._board[35] = this._board[23];
+            this._board[23] = placeholder;
+
+            placeholder = this._board[22];
+            this._board[22] = this._board[27];
+            this._board[27] = this._board[34];
+            this._board[34] = this._board[29];
+            this._board[29] = placeholder;
+        }
+
+        public void RotateQuad4CounterClockWise()
+        {
+            int placeholder = this._board[21];
+
+            this._board[21] = this._board[23];
+            this._board[23] = this._board[35];
+            this._board[35] = this._board[33];
+            this._board[33] = placeholder;
+
+            placeholder = this._board[22];
+            this._board[22] = this._board[29];
+            this._board[29] = this._board[34];
+            this._board[34] = this._board[27];
+            this._board[27] = placeholder;
         }
     }
 }

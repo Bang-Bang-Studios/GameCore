@@ -8,15 +8,32 @@ namespace Pentago.GameCore
 {
     class Player
     {
-        public string name;
-        public bool activePlayer;
-        public Brush Fill;
+        private string _Name;
+        private bool _ActivePlayer;
+        private Brush _Fill;
 
         public Player(string name, bool activaTurn, Brush color)
         {
-            this.name = name;
-            this.activePlayer = activaTurn;
-            this.Fill = color;
+            this._Name = name;
+            this._ActivePlayer = activaTurn;
+            this._Fill = color;
         }
+
+        public string Name
+        {
+            get { return this._Name; } 
+        }
+
+        public bool ActivePlayer
+        {
+            set { this._ActivePlayer = value; }
+            get { return this._ActivePlayer; }
+        }
+
+        public Brush Fill
+        {
+            get { return this._Fill; }
+        }
+
     }
 }

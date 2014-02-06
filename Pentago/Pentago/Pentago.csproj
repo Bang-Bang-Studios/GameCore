@@ -109,16 +109,20 @@
     <Folder Include="AI\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="GUI\Images\1right.jpg" />
+    <EmbeddedResource Include="GUI\Images\CounterClockWise3.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="GUI\Images\1left.jpg" />
+    <EmbeddedResource Include="GUI\Images\ClockWise1.jpg" />
+    <EmbeddedResource Include="GUI\Images\ClockWise2.jpg" />
+    <EmbeddedResource Include="GUI\Images\ClockWise3.jpg" />
+    <EmbeddedResource Include="GUI\Images\CounterClockWise1.jpg" />
+    <EmbeddedResource Include="GUI\Images\CounterClockWise2.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="GUI\Images\2left.jpg" />
+    <EmbeddedResource Include="GUI\Images\ClockWise4.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="GUI\Images\2right.jpg" />
+    <EmbeddedResource Include="GUI\Images\CounterClockWise4.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -20,19 +20,27 @@ namespace Pentago
     /// </summary>
     public partial class Game : Window
     {
-        GameBrain gameBrain = null;
+        private GameBrain gameBrain = null;
 
-        const int BOARDSIZE = 36;
-        const int MAXCOLUMNS = 6;
-        const int MAXROWS = 6;
-        bool userMadeRotation = true;
+        private const int BOARDSIZE = 36;
+        private const int MAXCOLUMNS = 6;
+        private const int MAXROWS = 6;
+
+        private bool userMadeRotation = true;
+
+        private Player player1 = null;
+        private Player player2 = null;
 
         public Game()
         {
             InitializeComponent();
             PaintBoard();
-            gameBrain = new GameBrain();
-
+            //to initialize player, a switch case could be used
+            //according to the options the user selected on previous
+            //page
+            player1 = new Player("player1", true, Brushes.Green);
+            player2 = new Player("player2", false, Brushes.Blue);
+            gameBrain = new GameBrain(player1, player2);
         }
 
         public void PaintBoard()
@@ -63,28 +71,27 @@ namespace Pentago
                 {
                     Rectangle rec = (Rectangle)Board.Children[MAXCOLUMNS * row + col];
                     if (gameBrain.isPlayer1Turn())
-                        rec.Fill = Brushes.Green;
+                        rec.Fill = player1.Fill;
                     else
-                        rec.Fill = Brushes.Blue;
+                        rec.Fill = player2.Fill;
                     gameBrain.ChangeTurn();
+                    
                 }
-
                 MakeRotationsVisible();
             }
-
         }
 
         private void RePaintBoard()
         {
-            int[] tempBoard = gameBrain.GetBoard();
+            int[] tempBoard = gameBrain.GetBoard;
             for (int i = 0; i < BOARDSIZE; i++)
             {
                 Rectangle rec = (Rectangle)Board.Children[i];
                 
                 if (tempBoard[i] == 1)
-                    rec.Fill = Brushes.Green;
+                    rec.Fill = player1.Fill;
                 else if (tempBoard[i] == 2)
-                    rec.Fill = Brushes.Blue;
+                    rec.Fill = player2.Fill;
                 else
                     rec.Fill = Brushes.White;
             }
@@ -92,21 +99,29 @@ namespace Pentago
 
         private void MakeRotationsVisible() 
         {
-            btnRight1.Visibility = Visibility.Visible;
-            btnLeft1.Visibility = Visibility.Visible;
-            btnLeft2.Visibility = Visibility.Visible;
-            btnRight2.Visibility = Visibility.Visible;
+            btnClockWise1.Visibility = Visibility.Visible;
+            btnCounterClockWise1.Visibility = Visibility.Visible;
+            btnClockWise2.Visibility = Visibility.Visible;
+            btnCounterClockWise2.Visibility = Visibility.Visible;
+            btnClockWise3.Visibility = Visibility.Visible;
+            btnCounterClockWise3.Visibility = Visibility.Visible;
+            btnClockWise4.Visibility = Visibility.Visible;
+            btnCounterClockWise4.Visibility = Visibility.Visible;
         }
 
         private void MakeRotationsHidden()
         {
-            btnRight1.Visibility = Visibility.Hidden;
-            btnLeft1.Visibility = Visibility.Hidden;
-            btnLeft2.Visibility = Visibility.Hidden;
-            btnRight2.Visibility = Visibility.Hidden;
+            btnClockWise1.Visibility = Visibility.Hidden;
+            btnCounterClockWise1.Visibility = Visibility.Hidden;
+            btnClockWise2.Visibility = Visibility.Hidden;
+            btnCounterClockWise2.Visibility = Visibility.Hidden;
+            btnClockWise3.Visibility = Visibility.Hidden;
+            btnCounterClockWise3.Visibility = Visibility.Hidden;
+            btnClockWise4.Visibility = Visibility.Hidden;
+            btnCounterClockWise4.Visibility = Visibility.Hidden;
         }
 
-        private void btnLeft2_MouseDown(object sender, MouseButtonEventArgs e)
+        private void btnCounterClockWise2_MouseDown(object sender, MouseButtonEventArgs e)
         {
             gameBrain.RotateBoard(false, 2);
             RePaintBoard();
@@ -114,7 +129,7 @@ namespace Pentago
             MakeRotationsHidden();
         }
 
-        private void btnRight1_MouseDown(object sender, MouseButtonEventArgs e)
+        private void btnClockWise1_MouseDown(object sender, MouseButtonEventArgs e)
         {
             gameBrain.RotateBoard(true, 1);
             RePaintBoard();
@@ -122,7 +137,7 @@ namespace Pentago
             MakeRotationsHidden();
         }
 
-        private void btnLeft1_MouseDown(object sender, MouseButtonEventArgs e)
+        private void btnCounterClockWise1_MouseDown(object sender, MouseButtonEventArgs e)
         {
             gameBrain.RotateBoard(false, 1);
             RePaintBoard();
@@ -130,9 +145,41 @@ namespace Pentago
             MakeRotationsHidden();
         }
 
-        private void btnRight2_MouseDown(object sender, MouseButtonEventArgs e)
+        private void btnClockWise2_MouseDown(object sender, MouseButtonEventArgs e)
         {
             gameBrain.RotateBoard(true, 2);
+            RePaintBoard();
+            userMadeRotation = true;
+            MakeRotationsHidden();
+        }
+
+        private void btnClockWise3_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            gameBrain.RotateBoard(true, 3);
+            RePaintBoard();
+            userMadeRotation = true;
+            MakeRotationsHidden();
+        }
+
+        private void btnCounterClockWise3_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            gameBrain.RotateBoard(false, 3);
+            RePaintBoard();
+            userMadeRotation = true;
+            MakeRotationsHidden();
+        }
+
+        private void btnClockWise4_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            gameBrain.RotateBoard(true, 4);
+            RePaintBoard();
+            userMadeRotation = true;
+            MakeRotationsHidden();
+        }
+
+        private void btnCounterClockWise4_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            gameBrain.RotateBoard(false, 4);
             RePaintBoard();
             userMadeRotation = true;
             MakeRotationsHidden();

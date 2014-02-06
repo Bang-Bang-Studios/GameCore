@@ -8,16 +8,14 @@ namespace Pentago.GameCore
 {
     class GameBrain
     {
-        Board board = null;
-        Player player1 = null;
-        Player player2 = null;
-        Player emptyPlayer = null;
+        private Board board = null;
+        private Player player1 = null;
+        private Player player2 = null;
 
-        public GameBrain()
+        public GameBrain(Player player1, Player player2)
         {
-            emptyPlayer = new Player("EMPTY", false, Brushes.White);
-            player1 = new Player("Player1", true, Brushes.Green);
-            player2 = new Player("Player2", false, Brushes.Blue);
+            this.player1 = player1;
+            this.player2 = player2;
             InitializeBoard();
         }
 
@@ -29,7 +27,7 @@ namespace Pentago.GameCore
         public bool PlacePiece(short row, short col)
         {
             int player;
-            if (player1.activePlayer)
+            if (player1.ActivePlayer)
                 player = 1;
             else
                 player = 2;
@@ -63,10 +61,16 @@ namespace Pentago.GameCore
                         board.RotateQuad2CounterClockWise();
                     break;
                 case 3:
-
+                    if (rotateClockWise)
+                        board.RotateQuad3ClockWise();
+                    else
+                        board.RotateQuad3CounterClockWise();
                     break;
                 case 4:
-
+                    if (rotateClockWise)
+                        board.RotateQuad4ClockWise();
+                    else
+                        board.RotateQuad4CounterClockWise();
                     break;
                 default:
                     break;
@@ -92,26 +96,26 @@ namespace Pentago.GameCore
 
         public bool isPlayer1Turn()
         {
-            return player1.activePlayer;
+            return player1.ActivePlayer;
         }
 
         public void ChangeTurn()
         {
-            if (player1.activePlayer)
+            if (player1.ActivePlayer)
             {
-                player1.activePlayer = false;
-                player2.activePlayer = true;
+                player1.ActivePlayer = false;
+                player2.ActivePlayer = true;
             }
             else
             {
-                player1.activePlayer = true;
-                player2.activePlayer = false;
+                player1.ActivePlayer = true;
+                player2.ActivePlayer = false;
             }
         }
 
-        public int[] GetBoard()
+        public int[] GetBoard
         {
-            return board.GetBoard();
+            get { return board.GetBoard; }
         }
     }
 }
