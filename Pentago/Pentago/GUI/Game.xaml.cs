@@ -41,6 +41,7 @@ namespace Pentago
             player1 = new Player("player1", true, Brushes.Green);
             player2 = new Player("player2", false, Brushes.Blue);
             gameBrain = new GameBrain(player1, player2);
+            ShowActivePlayer();
         }
 
         public void PaintBoard()
@@ -58,27 +59,71 @@ namespace Pentago
 
         private void Board_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (userMadeRotation)
+            int rectSize = (int)Board.Width / MAXCOLUMNS;
+
+            Point mousePosition = e.GetPosition(Board);
+            short row = (short)(mousePosition.Y / rectSize);
+            short col = (short)(mousePosition.X / rectSize);
+            int winner = gameBrain.CheckForWin();
+            if (userMadeRotation && gameBrain.PlacePiece(row, col) && winner == 0)
             {
                 userMadeRotation = false;
-                int rectSize = (int)Board.Width / MAXCOLUMNS;
 
-                Point mousePosition = e.GetPosition(Board);
-                short row = (short)(mousePosition.Y / rectSize);
-                short col = (short)(mousePosition.X / rectSize);
+                Rectangle rec = (Rectangle)Board.Children[MAXCOLUMNS * row + col];
+                if (gameBrain.isPlayer1Turn())
+                    rec.Fill = player1.Fill;
+                else
+                    rec.Fill = player2.Fill;
 
-                if (gameBrain.PlacePiece(row, col))
-                {
-                    Rectangle rec = (Rectangle)Board.Children[MAXCOLUMNS * row + col];
-                    if (gameBrain.isPlayer1Turn())
-                        rec.Fill = player1.Fill;
-                    else
-                        rec.Fill = player2.Fill;
-                    gameBrain.ChangeTurn();
-                    
-                }
-                MakeRotationsVisible();
+                winner = gameBrain.CheckForWin();
+                if (winner != 0)
+                    ShowWinner(winner);
+                else
+                    MakeRotationsVisible();
             }
+            else if (winner != 0)
+                ShowWinner(winner);
+        }
+
+        private void ShowWinner(int winner)
+        {
+            string winnerAnnouncement = "";
+            switch (winner)
+            {
+                case 1:
+                    winnerAnnouncement = "Congratulations " + player1.Name + " you have won!";
+                    break;
+                case 2:
+                    winnerAnnouncement = "Congratulations " + player2.Name + " you have won!";
+                    break;
+                case 3:
+                    winnerAnnouncement = "It is a tie.";
+                    break;
+                default:
+                    break;
+            }
+
+            MessageBoxResult result = MessageBox.Show(winnerAnnouncement, "Pentago", MessageBoxButton.OK);
+            if (result == MessageBoxResult.OK)
+                StartNewGame();
+        }
+
+        private void StartNewGame() 
+        {
+            gameBrain.ResetGame();
+            RePaintBoard();
+            userMadeRotation = true;
+            player1 = new Player("player1", true, Brushes.Green);
+            player2 = new Player("player2", false, Brushes.Blue);
+            ShowActivePlayer();
+        }
+
+        private void ShowActivePlayer()
+        {
+            if (player1.ActivePlayer)
+                ActivePlayer.Fill = player1.Fill;
+            else
+                ActivePlayer.Fill = player2.Fill;
         }
 
         private void RePaintBoard()
@@ -109,6 +154,7 @@ namespace Pentago
             btnCounterClockWise4.Visibility = Visibility.Visible;
         }
 
+        //Hide all rotations and show which player turn is it
         private void MakeRotationsHidden()
         {
             btnClockWise1.Visibility = Visibility.Hidden;
@@ -119,6 +165,13 @@ namespace Pentago
             btnCounterClockWise3.Visibility = Visibility.Hidden;
             btnClockWise4.Visibility = Visibility.Hidden;
             btnCounterClockWise4.Visibility = Visibility.Hidden;
+
+            gameBrain.ChangeTurn();
+            int winner = gameBrain.CheckForWin();
+            if (winner != 0)
+                ShowWinner(winner);
+            else
+                ShowActivePlayer();
         }
 
         private void btnCounterClockWise2_MouseDown(object sender, MouseButtonEventArgs e)

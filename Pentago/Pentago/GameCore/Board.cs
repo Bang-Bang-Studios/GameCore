@@ -35,7 +35,7 @@ namespace Pentago.GameCore
             short count = 0;
             for (int i = 0; i < BOARDSIZE; i++)
             {
-                if (this._board[i] == 0)
+                if (this._board[i] != 0)
                     count++;
             }
             return count;

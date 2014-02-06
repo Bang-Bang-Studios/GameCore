@@ -14,5 +14,6 @@
         <Image Height="64" HorizontalAlignment="Left" Margin="139,652,0,0" Name="btnCounterClockWise3" Stretch="Fill" VerticalAlignment="Top" Width="154" Source="file:///C:/Users/Team7/Documents/Github/GameCore/Pentago/Pentago/GUI/Images/CounterClockWise3.jpg" MouseDown="btnCounterClockWise3_MouseDown" Visibility="Hidden" />
         <Image Height="67" HorizontalAlignment="Left" Margin="480,650,0,0" Name="btnClockWise4" Stretch="Fill" VerticalAlignment="Top" Width="159" Source="file:///C:/Users/Team7/Documents/Github/GameCore/Pentago/Pentago/GUI/Images/ClockWise4.jpg" MouseDown="btnClockWise4_MouseDown" Visibility="Hidden" />
         <Image Height="139" HorizontalAlignment="Left" Margin="658,491,0,0" Name="btnCounterClockWise4" Stretch="Fill" VerticalAlignment="Top" Width="75" Source="file:///C:/Users/Team7/Documents/Github/GameCore/Pentago/Pentago/GUI/Images/CounterClockWise4.jpg" MouseDown="btnCounterClockWise4_MouseDown" Visibility="Hidden" />
+        <Rectangle Height="58" HorizontalAlignment="Left" Margin="324,12,0,0" Name="ActivePlayer" Stroke="Black" VerticalAlignment="Top" Width="115" />
     </Grid>
 </Window>

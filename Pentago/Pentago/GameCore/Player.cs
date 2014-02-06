@@ -12,10 +12,10 @@ namespace Pentago.GameCore
         private bool _ActivePlayer;
         private Brush _Fill;
 
-        public Player(string name, bool activaTurn, Brush color)
+        public Player(string name, bool activeTurn, Brush color)
         {
             this._Name = name;
-            this._ActivePlayer = activaTurn;
+            this._ActivePlayer = activeTurn;
             this._Fill = color;
         }
 
