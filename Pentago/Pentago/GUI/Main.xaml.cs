@@ -27,7 +27,13 @@ namespace Pentago
         private void btnQuickMatch_Click(object sender, RoutedEventArgs e)
         {
             var gameWindow = new Game();
+            this.Hide();
             gameWindow.Show();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Application.Current.Shutdown();
         }
     }
 }

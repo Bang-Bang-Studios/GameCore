@@ -10,6 +10,7 @@ namespace Pentago.GameCore
     class GameBrain
     {
         private Board board = null;
+        //These are the player for the GameBrain
         private Player player1 = null;
         private Player player2 = null;
         private const int MAXMOVES = 36;
@@ -77,6 +78,8 @@ namespace Pentago.GameCore
                 default:
                     break;
             }
+            //Change players' turn after rotation
+            ChangeTurn();
         }
 
         private bool ValidateMove(short row, short col)

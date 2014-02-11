@@ -28,6 +28,7 @@ namespace Pentago
 
         private bool userMadeRotation = true;
 
+        //These are the players for the GUI
         private Player player1 = null;
         private Player player2 = null;
 
@@ -154,7 +155,7 @@ namespace Pentago
             btnCounterClockWise4.Visibility = Visibility.Visible;
         }
 
-        //Hide all rotations and show which player turn is it
+        //Hide all rotations and show which players' turn is it
         private void MakeRotationsHidden()
         {
             btnClockWise1.Visibility = Visibility.Hidden;
@@ -166,7 +167,10 @@ namespace Pentago
             btnClockWise4.Visibility = Visibility.Hidden;
             btnCounterClockWise4.Visibility = Visibility.Hidden;
 
-            gameBrain.ChangeTurn();
+            //Changes turn of player in GUI
+            player1.ActivePlayer = gameBrain.isPlayer1Turn();
+            player2.ActivePlayer = !player1.ActivePlayer;
+
             int winner = gameBrain.CheckForWin();
             if (winner != 0)
                 ShowWinner(winner);
@@ -236,6 +240,12 @@ namespace Pentago
             RePaintBoard();
             userMadeRotation = true;
             MakeRotationsHidden();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
         }
     }
 }
