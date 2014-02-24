@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace Pentago.GameCore
 {
-    class Board
+    public class Board
     {
         private const int BOARDSIZE = 36;
         private const int BOARWIDTH = 6;
@@ -25,6 +25,11 @@ namespace Pentago.GameCore
             return this._board[BOARWIDTH * row + col]; 
         }
 
+        public int GetPlayer(int i)
+        {
+            return this._board[i];
+        }
+
         public int[] GetBoard
         {
             get { return this._board; }
@@ -41,18 +46,15 @@ namespace Pentago.GameCore
             return count;
         }
 
-        public void ClearBoard()
-        {
-            for (int i = 0; i < BOARDSIZE; i++)
-            {
-                this._board[i] = 0;
-            }
-        }
-
         public void UpdateBoard(short row, short col, int player)
         {
             this._board[BOARWIDTH * row + col] = player;
         }
+
+        public void UpdateBoard(int slot, int player)
+        {
+            this._board[slot] = player;
+        }   
 
         public void RotateQuad1ClockWise() 
         {

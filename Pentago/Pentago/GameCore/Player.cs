@@ -6,17 +6,17 @@ using System.Windows.Media;
 
 namespace Pentago.GameCore
 {
-    class Player
+    public class Player
     {
         private string _Name;
         private bool _ActivePlayer;
-        private Brush _Fill;
+        private ImageBrush _Image;
 
-        public Player(string name, bool activeTurn, Brush color)
+        public Player(string name, bool activeTurn, ImageBrush playerImage)
         {
             this._Name = name;
             this._ActivePlayer = activeTurn;
-            this._Fill = color;
+            this._Image = playerImage;
         }
 
         public string Name
@@ -30,9 +30,9 @@ namespace Pentago.GameCore
             get { return this._ActivePlayer; }
         }
 
-        public Brush Fill
+        public Brush Image
         {
-            get { return this._Fill; }
+            get { return this._Image; }
         }
 
     }

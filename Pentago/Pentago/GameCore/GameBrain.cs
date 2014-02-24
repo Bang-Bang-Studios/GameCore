@@ -4,22 +4,81 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media;
 using System.Windows;
+using System.Threading;
+using System.Threading.Tasks;
+using Pentago.AI;
+using System.ComponentModel;
 
 namespace Pentago.GameCore
 {
-    class GameBrain
+    public class GameBrain
     {
         private Board board = null;
+
         //These are the player for the GameBrain
         private Player player1 = null;
-        private Player player2 = null;
+        private computerAI player2;
         private const int MAXMOVES = 36;
 
-        public GameBrain(Player player1, Player player2)
+        //Initializes a human vs human game
+        public GameBrain(Player player1)
         {
             this.player1 = player1;
-            this.player2 = player2;
             InitializeBoard();
+        }
+
+        //Initializes a human vs computer game
+        public GameBrain(Player player1, computerAI computerPlayer)
+        {
+            this.player1 = player1;
+            this.player2 = computerPlayer;
+            InitializeBoard();
+        }
+
+        public bool MakeComputerMove()
+        {
+            player2.MakeAIMove(board);
+            if (PlacePiece(player2.GetMoveChoice()))
+                return true;
+
+            Console.WriteLine("Something went WRONG! :(");
+            return false;
+        }
+
+        public int GetComputerMove()
+        {
+            return player2.GetMoveChoice();
+        }
+
+        private bool PlacePiece(int slot)
+        {
+            int player;
+            if (player1.ActivePlayer)
+                player = 1;
+            else
+                player = 2;
+
+            if (ValidateMove(slot))
+            {
+                board.UpdateBoard(slot, player);
+                return true;
+            }
+            else
+                return false;
+        }
+
+        private bool ValidateMove(int slot)
+        {
+            if (board.GetPlayer(slot) == 0)
+                return true;
+            return false;
+        }
+
+        public void MakeComputerRotation()
+        {
+            bool rotateClockWise = player2.GetRotationDirection();
+            short quad = player2.GetCuadrant();
+            RotateBoard(rotateClockWise, quad);
         }
 
         private void InitializeBoard()
@@ -78,7 +137,6 @@ namespace Pentago.GameCore
                 default:
                     break;
             }
-            //Change players' turn after rotation
             ChangeTurn();
         }
 
@@ -94,28 +152,17 @@ namespace Pentago.GameCore
             return player1.ActivePlayer;
         }
 
-        public void ChangeTurn()
+        private void ChangeTurn()
         {
             if (player1.ActivePlayer)
-            {
                 player1.ActivePlayer = false;
-                player2.ActivePlayer = true;
-            }
             else
-            {
                 player1.ActivePlayer = true;
-                player2.ActivePlayer = false;
-            }
         }
 
         public int[] GetBoard
         {
             get { return board.GetBoard; }
-        }
-
-        public void ResetGame()
-        {
-            board.ClearBoard();
         }
 
         public int CheckForWin()
@@ -129,7 +176,7 @@ namespace Pentago.GameCore
             if (numMoves >= 9) // First check to see if it's even possible to win (Fifth move for player 1)
             {
                 // Check for horizontal win. If no win, continue to checking vert and diag.
-                int horiz = checkHorizontals();
+                int horiz = CheckHorizontals();
                 if (horiz == 0) // No one won on a horizontal. Check for verticals.
                 {
 
@@ -150,7 +197,7 @@ namespace Pentago.GameCore
                     res = false;
                 }
 
-                int vert = checkVerticals();
+                int vert = CheckVerticals();
 
                 if (vert == 0) // No one won on a vertical. Check for diagonals.
                 {
@@ -172,7 +219,7 @@ namespace Pentago.GameCore
                     res = false;
                 }
 
-                int diag = checkDiags();
+                int diag = CheckDiags();
                 if (diag == 0) // No one won on a diagonal. Check to see if it's possible to make more moves.
                 {
                 }
@@ -194,30 +241,20 @@ namespace Pentago.GameCore
 
 
                 if (res && numMoves < MAXMOVES)
-                {
                     return 0; // The game continues
-                }
                 if (tie || (p1w && p2w))
-                {
                     return 3;
-                }
                 if (p1w)
-                {
                     return 1;
-                }
                 if (p2w)
-                {
                     return 2;
-                }
                 if (numMoves == MAXMOVES)
-                {
                     return 3;
-                }
             }
             return 0;
         }
 
-        int checkHorizontals()
+        private int CheckHorizontals()
         {
             bool res = true;
             bool p1w = false;
@@ -225,18 +262,18 @@ namespace Pentago.GameCore
 
             int returnValue = 0;
             short[] possibilities = new short[12];
-            possibilities[0] = (short)checkPiecesOnBoard(new Point(0, 0), new Point(0, 1), new Point(0, 2), new Point(0, 3), new Point(0, 4));
-            possibilities[1] = (short)checkPiecesOnBoard(new Point(0, 1), new Point(0, 2), new Point(0, 3), new Point(0, 4), new Point(0, 5));
-            possibilities[2] = (short)checkPiecesOnBoard(new Point(1, 0), new Point(1, 1), new Point(1, 2), new Point(1, 3), new Point(1, 4));
-            possibilities[3] = (short)checkPiecesOnBoard(new Point(1, 1), new Point(1, 2), new Point(1, 3), new Point(1, 4), new Point(1, 5));
-            possibilities[4] = (short)checkPiecesOnBoard(new Point(2, 0), new Point(2, 1), new Point(2, 2), new Point(2, 3), new Point(2, 4));
-            possibilities[5] = (short)checkPiecesOnBoard(new Point(2, 1), new Point(2, 2), new Point(2, 3), new Point(2, 4), new Point(2, 5));
-            possibilities[6] = (short)checkPiecesOnBoard(new Point(3, 0), new Point(3, 1), new Point(3, 2), new Point(3, 3), new Point(3, 4));
-            possibilities[7] = (short)checkPiecesOnBoard(new Point(3, 1), new Point(3, 2), new Point(3, 3), new Point(3, 4), new Point(3, 5));
-            possibilities[8] = (short)checkPiecesOnBoard(new Point(4, 0), new Point(4, 1), new Point(4, 2), new Point(4, 3), new Point(4, 4));
-            possibilities[9] = (short)checkPiecesOnBoard(new Point(4, 1), new Point(4, 2), new Point(4, 3), new Point(4, 4), new Point(4, 5));
-            possibilities[10] = (short)checkPiecesOnBoard(new Point(5, 0), new Point(5, 1), new Point(5, 2), new Point(5, 3), new Point(5, 4));
-            possibilities[11] = (short)checkPiecesOnBoard(new Point(5, 1), new Point(5, 2), new Point(5, 3), new Point(5, 4), new Point(5, 5));
+            possibilities[0] = (short)CheckPiecesOnBoard(new Point(0, 0), new Point(0, 1), new Point(0, 2), new Point(0, 3), new Point(0, 4));
+            possibilities[1] = (short)CheckPiecesOnBoard(new Point(0, 1), new Point(0, 2), new Point(0, 3), new Point(0, 4), new Point(0, 5));
+            possibilities[2] = (short)CheckPiecesOnBoard(new Point(1, 0), new Point(1, 1), new Point(1, 2), new Point(1, 3), new Point(1, 4));
+            possibilities[3] = (short)CheckPiecesOnBoard(new Point(1, 1), new Point(1, 2), new Point(1, 3), new Point(1, 4), new Point(1, 5));
+            possibilities[4] = (short)CheckPiecesOnBoard(new Point(2, 0), new Point(2, 1), new Point(2, 2), new Point(2, 3), new Point(2, 4));
+            possibilities[5] = (short)CheckPiecesOnBoard(new Point(2, 1), new Point(2, 2), new Point(2, 3), new Point(2, 4), new Point(2, 5));
+            possibilities[6] = (short)CheckPiecesOnBoard(new Point(3, 0), new Point(3, 1), new Point(3, 2), new Point(3, 3), new Point(3, 4));
+            possibilities[7] = (short)CheckPiecesOnBoard(new Point(3, 1), new Point(3, 2), new Point(3, 3), new Point(3, 4), new Point(3, 5));
+            possibilities[8] = (short)CheckPiecesOnBoard(new Point(4, 0), new Point(4, 1), new Point(4, 2), new Point(4, 3), new Point(4, 4));
+            possibilities[9] = (short)CheckPiecesOnBoard(new Point(4, 1), new Point(4, 2), new Point(4, 3), new Point(4, 4), new Point(4, 5));
+            possibilities[10] = (short)CheckPiecesOnBoard(new Point(5, 0), new Point(5, 1), new Point(5, 2), new Point(5, 3), new Point(5, 4));
+            possibilities[11] = (short)CheckPiecesOnBoard(new Point(5, 1), new Point(5, 2), new Point(5, 3), new Point(5, 4), new Point(5, 5));
 
             foreach (short s in possibilities)
             {
@@ -253,25 +290,17 @@ namespace Pentago.GameCore
             }
 
             if (res)
-            {
                 return 0;
-            }
             if (p1w && p2w)
-            {
                 return 3;
-            }
             if (p1w)
-            {
                 return 1;
-            }
             if (p2w)
-            {
                 return 2;
-            }
             return returnValue;
         }
 
-        int checkVerticals()
+        private int CheckVerticals()
         {
             bool res = true;
             bool p1w = false;
@@ -280,18 +309,18 @@ namespace Pentago.GameCore
             int returnValue = 0;
             short[] possibilities = new short[12];
 
-            possibilities[0] = (short)checkPiecesOnBoard(new Point(0, 0), new Point(1, 0), new Point(2, 0), new Point(3, 0), new Point(4, 0));
-            possibilities[1] = (short)checkPiecesOnBoard(new Point(1, 0), new Point(2, 0), new Point(3, 0), new Point(4, 0), new Point(5, 0));
-            possibilities[2] = (short)checkPiecesOnBoard(new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(3, 1), new Point(4, 1));
-            possibilities[3] = (short)checkPiecesOnBoard(new Point(1, 1), new Point(2, 1), new Point(3, 1), new Point(4, 1), new Point(5, 1));
-            possibilities[4] = (short)checkPiecesOnBoard(new Point(0, 2), new Point(1, 2), new Point(2, 2), new Point(3, 2), new Point(4, 2));
-            possibilities[5] = (short)checkPiecesOnBoard(new Point(1, 2), new Point(2, 2), new Point(3, 2), new Point(4, 2), new Point(5, 2));
-            possibilities[6] = (short)checkPiecesOnBoard(new Point(0, 3), new Point(1, 3), new Point(2, 3), new Point(3, 3), new Point(4, 3));
-            possibilities[7] = (short)checkPiecesOnBoard(new Point(1, 3), new Point(2, 3), new Point(3, 3), new Point(4, 3), new Point(5, 3));
-            possibilities[8] = (short)checkPiecesOnBoard(new Point(0, 4), new Point(1, 4), new Point(2, 4), new Point(3, 4), new Point(4, 4));
-            possibilities[9] = (short)checkPiecesOnBoard(new Point(1, 4), new Point(2, 4), new Point(3, 4), new Point(4, 4), new Point(5, 4));
-            possibilities[10] = (short)checkPiecesOnBoard(new Point(0, 5), new Point(1, 5), new Point(2, 5), new Point(3, 5), new Point(4, 5));
-            possibilities[11] = (short)checkPiecesOnBoard(new Point(1, 5), new Point(2, 5), new Point(3, 5), new Point(4, 5), new Point(5, 5));
+            possibilities[0] = (short)CheckPiecesOnBoard(new Point(0, 0), new Point(1, 0), new Point(2, 0), new Point(3, 0), new Point(4, 0));
+            possibilities[1] = (short)CheckPiecesOnBoard(new Point(1, 0), new Point(2, 0), new Point(3, 0), new Point(4, 0), new Point(5, 0));
+            possibilities[2] = (short)CheckPiecesOnBoard(new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(3, 1), new Point(4, 1));
+            possibilities[3] = (short)CheckPiecesOnBoard(new Point(1, 1), new Point(2, 1), new Point(3, 1), new Point(4, 1), new Point(5, 1));
+            possibilities[4] = (short)CheckPiecesOnBoard(new Point(0, 2), new Point(1, 2), new Point(2, 2), new Point(3, 2), new Point(4, 2));
+            possibilities[5] = (short)CheckPiecesOnBoard(new Point(1, 2), new Point(2, 2), new Point(3, 2), new Point(4, 2), new Point(5, 2));
+            possibilities[6] = (short)CheckPiecesOnBoard(new Point(0, 3), new Point(1, 3), new Point(2, 3), new Point(3, 3), new Point(4, 3));
+            possibilities[7] = (short)CheckPiecesOnBoard(new Point(1, 3), new Point(2, 3), new Point(3, 3), new Point(4, 3), new Point(5, 3));
+            possibilities[8] = (short)CheckPiecesOnBoard(new Point(0, 4), new Point(1, 4), new Point(2, 4), new Point(3, 4), new Point(4, 4));
+            possibilities[9] = (short)CheckPiecesOnBoard(new Point(1, 4), new Point(2, 4), new Point(3, 4), new Point(4, 4), new Point(5, 4));
+            possibilities[10] = (short)CheckPiecesOnBoard(new Point(0, 5), new Point(1, 5), new Point(2, 5), new Point(3, 5), new Point(4, 5));
+            possibilities[11] = (short)CheckPiecesOnBoard(new Point(1, 5), new Point(2, 5), new Point(3, 5), new Point(4, 5), new Point(5, 5));
 
             foreach (short s in possibilities)
             {
@@ -308,25 +337,17 @@ namespace Pentago.GameCore
             }
 
             if (res)
-            {
                 return 0;
-            }
             if (p1w && p2w)
-            {
                 return 3;
-            }
             if (p1w)
-            {
                 return 1;
-            }
             if (p2w)
-            {
                 return 2;
-            }
             return returnValue;
         }
 
-        int checkDiags()
+        private int CheckDiags()
         {
             bool res = true;
             bool p1w = false;
@@ -336,16 +357,16 @@ namespace Pentago.GameCore
             short[] possibilities = new short[8];
 
             // Top Left to Bottom Rights
-            possibilities[0] = (short)checkPiecesOnBoard(new Point(0, 1), new Point(1, 2), new Point(2, 3), new Point(3, 4), new Point(4, 5));
-            possibilities[1] = (short)checkPiecesOnBoard(new Point(0, 0), new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4));
-            possibilities[2] = (short)checkPiecesOnBoard(new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4), new Point(5, 5));
-            possibilities[3] = (short)checkPiecesOnBoard(new Point(1, 0), new Point(2, 1), new Point(3, 2), new Point(4, 3), new Point(5, 4));
+            possibilities[0] = (short)CheckPiecesOnBoard(new Point(0, 1), new Point(1, 2), new Point(2, 3), new Point(3, 4), new Point(4, 5));
+            possibilities[1] = (short)CheckPiecesOnBoard(new Point(0, 0), new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4));
+            possibilities[2] = (short)CheckPiecesOnBoard(new Point(1, 1), new Point(2, 2), new Point(3, 3), new Point(4, 4), new Point(5, 5));
+            possibilities[3] = (short)CheckPiecesOnBoard(new Point(1, 0), new Point(2, 1), new Point(3, 2), new Point(4, 3), new Point(5, 4));
 
             // Bottom Left to Top Rights
-            possibilities[4] = (short)checkPiecesOnBoard(new Point(0, 4), new Point(1, 3), new Point(2, 2), new Point(3, 1), new Point(4, 0));
-            possibilities[5] = (short)checkPiecesOnBoard(new Point(0, 5), new Point(1, 4), new Point(2, 3), new Point(3, 2), new Point(4, 1));
-            possibilities[6] = (short)checkPiecesOnBoard(new Point(1, 4), new Point(2, 3), new Point(3, 2), new Point(4, 1), new Point(5, 0));
-            possibilities[7] = (short)checkPiecesOnBoard(new Point(1, 5), new Point(2, 4), new Point(3, 3), new Point(4, 2), new Point(5, 1));
+            possibilities[4] = (short)CheckPiecesOnBoard(new Point(0, 4), new Point(1, 3), new Point(2, 2), new Point(3, 1), new Point(4, 0));
+            possibilities[5] = (short)CheckPiecesOnBoard(new Point(0, 5), new Point(1, 4), new Point(2, 3), new Point(3, 2), new Point(4, 1));
+            possibilities[6] = (short)CheckPiecesOnBoard(new Point(1, 4), new Point(2, 3), new Point(3, 2), new Point(4, 1), new Point(5, 0));
+            possibilities[7] = (short)CheckPiecesOnBoard(new Point(1, 5), new Point(2, 4), new Point(3, 3), new Point(4, 2), new Point(5, 1));
 
             foreach (short s in possibilities)
             {
@@ -362,26 +383,18 @@ namespace Pentago.GameCore
             }
 
             if (res)
-            {
                 return 0;
-            }
             if (p1w && p2w)
-            {
                 return 3;
-            }
             if (p1w)
-            {
                 return 1;
-            }
             if (p2w)
-            {
                 return 2;
-            }
             return returnValue;
 
         }
 
-        int checkPiecesOnBoard(Point piece1, Point piece2, Point piece3, Point piece4, Point piece5)
+        private int CheckPiecesOnBoard(Point piece1, Point piece2, Point piece3, Point piece4, Point piece5)
         {
             int playerAtPiece1 = board.GetPlayer((short)piece1.X, (short)piece1.Y);
             int playerAtPiece2 = board.GetPlayer((short)piece2.X, (short)piece2.Y);

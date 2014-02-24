@@ -12,6 +12,12 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Pentago.GameCore;
+using Pentago.AI;
+using Pentago.GUI;
+
+//just for visual help
+using System.Threading;
+using System.ComponentModel;
 
 namespace Pentago
 {
@@ -31,17 +37,31 @@ namespace Pentago
         //These are the players for the GUI
         private Player player1 = null;
         private Player player2 = null;
+        private computerAI computerPlayer = null;
+        GameOptions gameOptions = null;
 
-        public Game()
+        public Game(GameOptions options)
         {
             InitializeComponent();
+            gameOptions = options;
             PaintBoard();
-            //to initialize player, a switch case could be used
-            //according to the options the user selected on previous
-            //page
-            player1 = new Player("player1", true, Brushes.Green);
-            player2 = new Player("player2", false, Brushes.Blue);
-            gameBrain = new GameBrain(player1, player2);
+            switch (gameOptions._TypeOfGame)
+            {
+                case GameOptions.TypeOfGame.QuickMatch:
+                    player1 = new Player(gameOptions._Player1Name, true, gameOptions._Player1Image);
+                    player2 = new Player(gameOptions._Player2Name, false, gameOptions._Player2Image);
+                    gameBrain = new GameBrain(player1);
+                    break;
+                case GameOptions.TypeOfGame.AI:
+                    player1 = new Player(gameOptions._Player1Name, true, gameOptions._Player1Image);
+                    computerPlayer = new computerAI(gameOptions._ComputerName, false, gameOptions._CopmuterImage, gameOptions._Difficulty);
+                    gameBrain = new GameBrain(player1, computerPlayer);
+                    if (!player1.ActivePlayer)
+                        GetComputerMoveAsynchronously();
+                    break;
+                default:
+                    break;
+            }
             ShowActivePlayer();
         }
 
@@ -60,30 +80,34 @@ namespace Pentago
 
         private void Board_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            int rectSize = (int)Board.Width / MAXCOLUMNS;
-
-            Point mousePosition = e.GetPosition(Board);
-            short row = (short)(mousePosition.Y / rectSize);
-            short col = (short)(mousePosition.X / rectSize);
-            int winner = gameBrain.CheckForWin();
-            if (userMadeRotation && gameBrain.PlacePiece(row, col) && winner == 0)
+            if (gameOptions._TypeOfGame == GameOptions.TypeOfGame.QuickMatch || player1.ActivePlayer)
             {
-                userMadeRotation = false;
+                int rectSize = (int)Board.Width / MAXCOLUMNS;
 
-                Rectangle rec = (Rectangle)Board.Children[MAXCOLUMNS * row + col];
-                if (gameBrain.isPlayer1Turn())
-                    rec.Fill = player1.Fill;
-                else
-                    rec.Fill = player2.Fill;
+                Point mousePosition = e.GetPosition(Board);
+                short row = (short)(mousePosition.Y / rectSize);
+                short col = (short)(mousePosition.X / rectSize);
+                int winner = gameBrain.CheckForWin();
+                if (userMadeRotation && gameBrain.PlacePiece(row, col) && winner == 0)
+                {
+                    userMadeRotation = false;
 
-                winner = gameBrain.CheckForWin();
-                if (winner != 0)
+                    Rectangle rec = (Rectangle)Board.Children[MAXCOLUMNS * row + col];
+                    if (gameBrain.isPlayer1Turn())
+                        rec.Fill = player1.Image;
+                    else
+                        rec.Fill = player2.Image;
+
+                    winner = gameBrain.CheckForWin();
+                    if (winner != 0)
+                        ShowWinner(winner);
+                    else
+                        MakeRotationsVisible();
+                }
+                else if (winner != 0)
                     ShowWinner(winner);
-                else
-                    MakeRotationsVisible();
             }
-            else if (winner != 0)
-                ShowWinner(winner);
+
         }
 
         private void ShowWinner(int winner)
@@ -95,7 +119,10 @@ namespace Pentago
                     winnerAnnouncement = "Congratulations " + player1.Name + " you have won!";
                     break;
                 case 2:
-                    winnerAnnouncement = "Congratulations " + player2.Name + " you have won!";
+                    if (gameOptions._TypeOfGame == GameOptions.TypeOfGame.QuickMatch)
+                        winnerAnnouncement = "Congratulations " + player2.Name + " you have won!";
+                    else if (gameOptions._TypeOfGame == GameOptions.TypeOfGame.AI)
+                        winnerAnnouncement = "Congratulations " + computerPlayer.Name + " you have won!";
                     break;
                 case 3:
                     winnerAnnouncement = "It is a tie.";
@@ -104,27 +131,25 @@ namespace Pentago
                     break;
             }
 
-            MessageBoxResult result = MessageBox.Show(winnerAnnouncement, "Pentago", MessageBoxButton.OK);
-            if (result == MessageBoxResult.OK)
-                StartNewGame();
-        }
-
-        private void StartNewGame() 
-        {
-            gameBrain.ResetGame();
-            RePaintBoard();
-            userMadeRotation = true;
-            player1 = new Player("player1", true, Brushes.Green);
-            player2 = new Player("player2", false, Brushes.Blue);
-            ShowActivePlayer();
+            MessageBox.Show(winnerAnnouncement, "Pentago", MessageBoxButton.OK);
         }
 
         private void ShowActivePlayer()
         {
-            if (player1.ActivePlayer)
-                ActivePlayer.Fill = player1.Fill;
-            else
-                ActivePlayer.Fill = player2.Fill;
+            if (gameOptions._TypeOfGame == GameOptions.TypeOfGame.QuickMatch)
+            {
+                if (player1.ActivePlayer)
+                    ActivePlayer.Fill = player1.Image;
+                else
+                    ActivePlayer.Fill = player2.Image;
+            }
+            else if (gameOptions._TypeOfGame == GameOptions.TypeOfGame.AI)
+            {
+                if (player1.ActivePlayer)
+                    ActivePlayer.Fill = player1.Image;
+                else
+                    ActivePlayer.Fill = computerPlayer.Image;
+            }
         }
 
         private void RePaintBoard()
@@ -133,13 +158,24 @@ namespace Pentago
             for (int i = 0; i < BOARDSIZE; i++)
             {
                 Rectangle rec = (Rectangle)Board.Children[i];
-                
-                if (tempBoard[i] == 1)
-                    rec.Fill = player1.Fill;
-                else if (tempBoard[i] == 2)
-                    rec.Fill = player2.Fill;
-                else
-                    rec.Fill = Brushes.White;
+                if (gameOptions._TypeOfGame == GameOptions.TypeOfGame.QuickMatch)
+                {
+                    if (tempBoard[i] == 1)
+                        rec.Fill = player1.Image;
+                    else if (tempBoard[i] == 2)
+                        rec.Fill = player2.Image;
+                    else
+                        rec.Fill = Brushes.White;
+                }
+                else if (gameOptions._TypeOfGame == GameOptions.TypeOfGame.AI)
+                {
+                    if (tempBoard[i] == 1)
+                        rec.Fill = player1.Image;
+                    else if (tempBoard[i] == 2)
+                        rec.Fill = computerPlayer.Image;
+                    else
+                        rec.Fill = Brushes.White;
+                }
             }
         }
 
@@ -155,9 +191,10 @@ namespace Pentago
             btnCounterClockWise4.Visibility = Visibility.Visible;
         }
 
-        //Hide all rotations and show which players' turn is it
+        //Hide all rotations and show which player turn is it
         private void MakeRotationsHidden()
         {
+            userMadeRotation = true;
             btnClockWise1.Visibility = Visibility.Hidden;
             btnCounterClockWise1.Visibility = Visibility.Hidden;
             btnClockWise2.Visibility = Visibility.Hidden;
@@ -169,20 +206,71 @@ namespace Pentago
 
             //Changes turn of player in GUI
             player1.ActivePlayer = gameBrain.isPlayer1Turn();
-            player2.ActivePlayer = !player1.ActivePlayer;
 
             int winner = gameBrain.CheckForWin();
             if (winner != 0)
                 ShowWinner(winner);
             else
                 ShowActivePlayer();
+
+            //if this is a human vs computer game
+            if (gameOptions._TypeOfGame == GameOptions.TypeOfGame.AI)
+            {
+                if (!player1.ActivePlayer && winner == 0)
+                    GetComputerMoveAsynchronously();
+            }
+        }
+
+        private void GetComputerMoveAsynchronously()
+        {
+            var bw = new BackgroundWorker();
+            // define the event handlers
+            bw.DoWork += (sender, args) =>
+            {
+                int winner = gameBrain.CheckForWin();
+                if (!gameBrain.MakeComputerMove() || winner != 0)
+                {
+                    bw.CancelAsync();
+                    if (winner != 0)
+                        ShowWinner(winner);
+                }
+            };
+            bw.RunWorkerCompleted += (sender, args) =>
+            {
+                if (args.Error != null)  // if an exception occurred during DoWork,
+                    MessageBox.Show(args.Error.ToString());  // do your error handling here
+
+                int winner = gameBrain.CheckForWin();
+                if (winner == 0)
+                {
+                    //Update GUI player
+                    int computerMove = gameBrain.GetComputerMove();
+                    Rectangle rec = (Rectangle)Board.Children[computerMove];
+                    rec.Fill = computerPlayer.Image;
+                    winner = gameBrain.CheckForWin();
+                    if (winner != 0)
+                        ShowWinner(winner);
+                    else
+                        GetComputerRotation();
+                }
+
+            };
+            bw.RunWorkerAsync();
+        }
+
+        private void GetComputerRotation()
+        {
+            /*****************************SIMULATE ANIMATION*****************************/
+            //Thread.Sleep(1000);
+            gameBrain.MakeComputerRotation();
+            MakeRotationsHidden();
+            RePaintBoard();
         }
 
         private void btnCounterClockWise2_MouseDown(object sender, MouseButtonEventArgs e)
         {
             gameBrain.RotateBoard(false, 2);
             RePaintBoard();
-            userMadeRotation = true;
             MakeRotationsHidden();
         }
 
@@ -190,7 +278,6 @@ namespace Pentago
         {
             gameBrain.RotateBoard(true, 1);
             RePaintBoard();
-            userMadeRotation = true;
             MakeRotationsHidden();
         }
 
@@ -198,7 +285,6 @@ namespace Pentago
         {
             gameBrain.RotateBoard(false, 1);
             RePaintBoard();
-            userMadeRotation = true;
             MakeRotationsHidden();
         }
 
@@ -206,7 +292,6 @@ namespace Pentago
         {
             gameBrain.RotateBoard(true, 2);
             RePaintBoard();
-            userMadeRotation = true;
             MakeRotationsHidden();
         }
 
@@ -214,7 +299,6 @@ namespace Pentago
         {
             gameBrain.RotateBoard(true, 3);
             RePaintBoard();
-            userMadeRotation = true;
             MakeRotationsHidden();
         }
 
@@ -222,7 +306,6 @@ namespace Pentago
         {
             gameBrain.RotateBoard(false, 3);
             RePaintBoard();
-            userMadeRotation = true;
             MakeRotationsHidden();
         }
 
@@ -230,7 +313,6 @@ namespace Pentago
         {
             gameBrain.RotateBoard(true, 4);
             RePaintBoard();
-            userMadeRotation = true;
             MakeRotationsHidden();
         }
 
@@ -238,14 +320,24 @@ namespace Pentago
         {
             gameBrain.RotateBoard(false, 4);
             RePaintBoard();
-            userMadeRotation = true;
             MakeRotationsHidden();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            var mainWindow = new MainWindow();
-            mainWindow.Show();
+            Window main = new MainWindow();
+            App.Current.MainWindow = main;
+            this.Hide();
+            main.Show();
+            
+        }
+
+        private void btnClose_Click(object sender, RoutedEventArgs e)
+        {
+            Window main = new MainWindow();
+            App.Current.MainWindow = main;
+            this.Hide();
+            main.Show();
         }
     }
 }
