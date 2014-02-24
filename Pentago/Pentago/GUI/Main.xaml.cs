@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Pentago.GUI;
+using Pentago.GameCore;
 using Pentago.AI;
 
 namespace Pentago
@@ -32,14 +33,18 @@ namespace Pentago
             //Idieally all this options will be set from GUI and then extracted
             //and passed to the gameOptions constructor
             string player1Name = "Diego Castillo";
+            bool isPlayer1Active = true;
             ImageBrush player1Image = new ImageBrush();
             player1Image.ImageSource = new BitmapImage(new Uri("pack://application:,,,/GUI/images/dragon1.jpg", UriKind.Absolute));
+            Player player1 = new Player(player1Name, isPlayer1Active, player1Image);
+
 
             string player2Name = "Antonio Banderas";
             ImageBrush player2Image = new ImageBrush();
             player2Image.ImageSource = new BitmapImage(new Uri("pack://application:,,,/GUI/images/dragon2.jpg", UriKind.Absolute));
+            Player player2 = new Player(player2Name, !isPlayer1Active, player2Image);
 
-            GameOptions gameOptions = new GameOptions(GameOptions.TypeOfGame.QuickMatch, player1Name, player1Image, player2Name, player2Image);
+            GameOptions gameOptions = new GameOptions(GameOptions.TypeOfGame.QuickMatch, player1, player2);
             Window gameWindow = new Game(gameOptions);
             App.Current.MainWindow = gameWindow;
             gameWindow.Show();
@@ -51,15 +56,18 @@ namespace Pentago
             //Idieally all this options will be set from GUI and then extracted
             //and passed to the gameOptions constructor 
             string player1Name = "Diego Castillo";
+            bool isPlayer1Active = true;
             ImageBrush player1Image = new ImageBrush();
             player1Image.ImageSource = new BitmapImage(new Uri("pack://application:,,,/GUI/images/dragon1.jpg", UriKind.Absolute));
+            Player player1 = new Player(player1Name, isPlayer1Active, player1Image);
 
             string computerPlayerName = "Miley Twerk";
             ImageBrush computerPlayerImage = new ImageBrush();
             computerPlayerImage.ImageSource = new BitmapImage(new Uri("pack://application:,,,/GUI/images/dragon2.jpg", UriKind.Absolute));
             computerAI.Difficulty difficulty = computerAI.Difficulty.Hard;
+            computerAI computerPlayer = new computerAI(computerPlayerName, !isPlayer1Active, computerPlayerImage, difficulty);
 
-            GameOptions gameOptions = new GameOptions(GameOptions.TypeOfGame.AI, player1Name, player1Image, computerPlayerName, computerPlayerImage, difficulty);
+            GameOptions gameOptions = new GameOptions(GameOptions.TypeOfGame.AI, player1, computerPlayer);
             Window gameWindow = new Game(gameOptions);
             App.Current.MainWindow = gameWindow;
             this.Hide();

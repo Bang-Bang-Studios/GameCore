@@ -48,13 +48,13 @@ namespace Pentago
             switch (gameOptions._TypeOfGame)
             {
                 case GameOptions.TypeOfGame.QuickMatch:
-                    player1 = new Player(gameOptions._Player1Name, true, gameOptions._Player1Image);
-                    player2 = new Player(gameOptions._Player2Name, false, gameOptions._Player2Image);
+                    player1 = options._Player1;
+                    player2 = options._Player2;
                     gameBrain = new GameBrain(player1);
                     break;
                 case GameOptions.TypeOfGame.AI:
-                    player1 = new Player(gameOptions._Player1Name, true, gameOptions._Player1Image);
-                    computerPlayer = new computerAI(gameOptions._ComputerName, false, gameOptions._CopmuterImage, gameOptions._Difficulty);
+                    player1 = options._Player1;
+                    computerPlayer = options._ComputerPlayer;
                     gameBrain = new GameBrain(player1, computerPlayer);
                     if (!player1.ActivePlayer)
                         GetComputerMoveAsynchronously();
@@ -105,33 +105,37 @@ namespace Pentago
                         MakeRotationsVisible();
                 }
                 else if (winner != 0)
+                {
+                    RePaintBoard();
                     ShowWinner(winner);
+                }
             }
 
         }
 
         private void ShowWinner(int winner)
         {
-            string winnerAnnouncement = "";
+            string winnerText = "";
             switch (winner)
             {
                 case 1:
-                    winnerAnnouncement = "Congratulations " + player1.Name + " you have won!";
+                    winnerText = "Congratulations " + player1.Name + " you have won!";
                     break;
                 case 2:
                     if (gameOptions._TypeOfGame == GameOptions.TypeOfGame.QuickMatch)
-                        winnerAnnouncement = "Congratulations " + player2.Name + " you have won!";
+                        winnerText = "Congratulations " + player2.Name + " you have won!";
                     else if (gameOptions._TypeOfGame == GameOptions.TypeOfGame.AI)
-                        winnerAnnouncement = "Congratulations " + computerPlayer.Name + " you have won!";
+                        winnerText = "Congratulations " + computerPlayer.Name + " you have won!";
                     break;
                 case 3:
-                    winnerAnnouncement = "It is a tie.";
+                    winnerText = "It is a tie.";
                     break;
                 default:
                     break;
             }
 
-            MessageBox.Show(winnerAnnouncement, "Pentago", MessageBoxButton.OK);
+            winnerAnnoucement.Text = winnerText;
+            //MessageBox.Show(winnerAnnouncement, "Pentago", MessageBoxButton.OK);
         }
 
         private void ShowActivePlayer()
@@ -227,9 +231,11 @@ namespace Pentago
             // define the event handlers
             bw.DoWork += (sender, args) =>
             {
+                Console.WriteLine("Started AI thread.");
                 int winner = gameBrain.CheckForWin();
                 if (!gameBrain.MakeComputerMove() || winner != 0)
                 {
+                    Console.WriteLine("Cancelled AI thread.");
                     bw.CancelAsync();
                     if (winner != 0)
                         ShowWinner(winner);
@@ -238,8 +244,12 @@ namespace Pentago
             bw.RunWorkerCompleted += (sender, args) =>
             {
                 if (args.Error != null)  // if an exception occurred during DoWork,
+                {
+                    Console.WriteLine("Something went wrong with AI thread.");
                     MessageBox.Show(args.Error.ToString());  // do your error handling here
+                }
 
+                Console.WriteLine("Good with AI thread.");
                 int winner = gameBrain.CheckForWin();
                 if (winner == 0)
                 {
@@ -247,11 +257,17 @@ namespace Pentago
                     int computerMove = gameBrain.GetComputerMove();
                     Rectangle rec = (Rectangle)Board.Children[computerMove];
                     rec.Fill = computerPlayer.Image;
+                    RePaintBoard();
                     winner = gameBrain.CheckForWin();
                     if (winner != 0)
                         ShowWinner(winner);
                     else
                         GetComputerRotation();
+                }
+                else if (winner != 0)
+                {
+                    RePaintBoard();
+                    ShowWinner(winner);
                 }
 
             };
@@ -261,7 +277,7 @@ namespace Pentago
         private void GetComputerRotation()
         {
             /*****************************SIMULATE ANIMATION*****************************/
-            //Thread.Sleep(1000);
+            Thread.Sleep(1000);
             gameBrain.MakeComputerRotation();
             MakeRotationsHidden();
             RePaintBoard();

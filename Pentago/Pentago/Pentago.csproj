@@ -77,7 +77,7 @@
       <DependentUpon>Game.xaml</DependentUpon>
     </Compile>
     <Compile Include="GameCore\GameBrain.cs" />
-    <Compile Include="GUI\GameOptions.cs" />
+    <Compile Include="GUI\Classes\GameOptions.cs" />
     <Compile Include="GUI\Main.xaml.cs">
       <DependentUpon>Main.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -108,25 +108,26 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="GUI\images\dragon1.jpg" />
-    <Resource Include="GUI\images\dragon2.jpg" />
+    <Resource Include="GUI\Images\dragon1.jpg" />
+    <Resource Include="GUI\Images\dragon2.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="GUI\images\CounterClockWise3.jpg" />
+    <Resource Include="GUI\Images\CounterClockWise3.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="GUI\images\ClockWise1.jpg" />
-    <Resource Include="GUI\images\ClockWise2.jpg" />
-    <Resource Include="GUI\images\ClockWise3.jpg" />
-    <Resource Include="GUI\images\CounterClockWise1.jpg" />
-    <Resource Include="GUI\images\CounterClockWise2.jpg" />
+    <Resource Include="GUI\Images\ClockWise1.jpg" />
+    <Resource Include="GUI\Images\ClockWise2.jpg" />
+    <Resource Include="GUI\Images\ClockWise3.jpg" />
+    <Resource Include="GUI\Images\CounterClockWise1.jpg" />
+    <Resource Include="GUI\Images\CounterClockWise2.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="GUI\images\ClockWise4.jpg" />
+    <Resource Include="GUI\Images\ClockWise4.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="GUI\images\CounterClockWise4.jpg" />
+    <Resource Include="GUI\Images\CounterClockWise4.jpg" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
