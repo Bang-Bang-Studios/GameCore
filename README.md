@@ -1,4 +1,4 @@
 GameCore
 ========
 
-This is the our model for the game core of the game Pentago. 
+Game-core prototype for the implementation of the Pentago game.
